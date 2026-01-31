@@ -17,6 +17,8 @@ public class Graph {
     // =========================
     // Agregar arista NO dirigida (sin duplicados)
     // =========================
+
+    
     public void addEdge(Node a, Node b) {
         if (a == null || b == null || a.equals(b)) return;
 
