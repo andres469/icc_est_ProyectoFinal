@@ -17,8 +17,6 @@ public class Graph {
     // =========================
     // Agregar arista NO dirigida (sin duplicados)
     // =========================
-
-    
     public void addEdge(Node a, Node b) {
         if (a == null || b == null || a.equals(b)) return;
 
@@ -38,7 +36,7 @@ public class Graph {
     }
 
     // =========================
-    // BFS (FUNCIONA BIEN)
+    // BFS (CORRECTO – NO TOCAR)
     // =========================
     public List<Node> bfs(Node start, Node target,
                           List<Node> visitedOrder,
@@ -77,7 +75,7 @@ public class Graph {
     }
 
     // =========================
-    // DFS RECURSIVO (ANIMACIÓN REAL)
+    // DFS (EXPLORACIÓN REAL + BACKTRACKING)
     // =========================
     public List<Node> dfs(Node start, Node target,
                           List<Node> visitedOrder,
@@ -86,46 +84,64 @@ public class Graph {
         if (start == null || target == null) return null;
 
         Set<Node> visited = new HashSet<>();
-        Map<Node, Node> parentMap = new HashMap<>();
+        List<Node> path = new ArrayList<>();
 
         boolean found = dfsRec(
-                start, target, visited,
-                parentMap, visitedOrder, visitedEdges
+                start,
+                target,
+                visited,
+                path,
+                visitedOrder,
+                visitedEdges
         );
 
-        if (!found) return null;
-        return reconstructPath(parentMap, target);
+        return found ? path : null;
     }
 
     private boolean dfsRec(Node current,
                            Node target,
                            Set<Node> visited,
-                           Map<Node, Node> parentMap,
+                           List<Node> path,
                            List<Node> visitedOrder,
                            List<VisitedEdge> visitedEdges) {
 
         visited.add(current);
+
+        // 🔵 exploración DFS real
         visitedOrder.add(current);
 
-        if (current.equals(target)) return true;
+        // 🔴 camino actual
+        path.add(current);
+
+        if (current.equals(target)) {
+            return true;
+        }
 
         for (Node neighbor : adjList.getOrDefault(current, List.of())) {
+
+            // registrar TODA arista explorada (ida y retroceso)
+            visitedEdges.add(new VisitedEdge(current, neighbor));
+
             if (!visited.contains(neighbor)) {
-
-                visitedEdges.add(new VisitedEdge(current, neighbor));
-                parentMap.put(neighbor, current);
-
-                if (dfsRec(neighbor, target, visited,
-                        parentMap, visitedOrder, visitedEdges)) {
+                if (dfsRec(
+                        neighbor,
+                        target,
+                        visited,
+                        path,
+                        visitedOrder,
+                        visitedEdges)) {
                     return true;
                 }
             }
         }
+
+        // ⬅️ BACKTRACKING
+        path.remove(path.size() - 1);
         return false;
     }
 
     // =========================
-    // Reconstruir camino final
+    // Reconstruir camino (solo BFS)
     // =========================
     private List<Node> reconstructPath(Map<Node, Node> parents, Node target) {
         LinkedList<Node> path = new LinkedList<>();
@@ -139,22 +155,20 @@ public class Graph {
     }
 
     // =========================
-    // ❌ Eliminar nodo (Y TODAS SUS CONEXIONES)
+    // Eliminar nodo (y conexiones)
     // =========================
     public void removeNode(Node node) {
         if (node == null || !adjList.containsKey(node)) return;
 
-        // eliminar conexiones entrantes
         for (Node n : adjList.keySet()) {
             adjList.get(n).remove(node);
         }
 
-        // eliminar nodo y conexiones salientes
         adjList.remove(node);
     }
 
     // =========================
-    // ❌ Eliminar SOLO una conexión (arista)
+    // Eliminar arista
     // =========================
     public void removeEdge(Node a, Node b) {
         if (a == null || b == null) return;
