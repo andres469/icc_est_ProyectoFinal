@@ -15,9 +15,18 @@ public class Graph {
     }
 
     // =========================
-    // Agregar arista NO dirigida (sin duplicados)
+    // Agregar arista (por defecto NO DIRIGIDA)
     // =========================
     public void addEdge(Node a, Node b) {
+        addEdge(a, b, true);
+    }
+
+    // =========================
+    // Agregar arista (DIRIGIDA / NO DIRIGIDA)
+    // true  = no dirigida (doble vía)
+    // false = dirigida
+    // =========================
+    public void addEdge(Node a, Node b, boolean noDirigido) {
         if (a == null || b == null || a.equals(b)) return;
 
         adjList.putIfAbsent(a, new ArrayList<>());
@@ -26,8 +35,11 @@ public class Graph {
         if (!adjList.get(a).contains(b)) {
             adjList.get(a).add(b);
         }
-        if (!adjList.get(b).contains(a)) {
-            adjList.get(b).add(a);
+
+        if (noDirigido) {
+            if (!adjList.get(b).contains(a)) {
+                adjList.get(b).add(a);
+            }
         }
     }
 
@@ -36,7 +48,7 @@ public class Graph {
     }
 
     // =========================
-    // BFS (CORRECTO – NO TOCAR)
+    // BFS
     // =========================
     public List<Node> bfs(Node start, Node target,
                           List<Node> visitedOrder,
@@ -60,13 +72,20 @@ public class Graph {
             }
 
             for (Node neighbor : adjList.getOrDefault(current, List.of())) {
+
                 if (!visited.contains(neighbor)) {
+
+                    boolean bidirectional =
+                            adjList.containsKey(neighbor) &&
+                            adjList.get(neighbor).contains(current);
+
+                    visitedEdges.add(
+                            new VisitedEdge(current, neighbor, bidirectional)
+                    );
+
                     visited.add(neighbor);
                     parentMap.put(neighbor, current);
-
                     visitedOrder.add(neighbor);
-                    visitedEdges.add(new VisitedEdge(current, neighbor));
-
                     queue.add(neighbor);
                 }
             }
@@ -75,7 +94,7 @@ public class Graph {
     }
 
     // =========================
-    // DFS (EXPLORACIÓN REAL + BACKTRACKING)
+    // DFS
     // =========================
     public List<Node> dfs(Node start, Node target,
                           List<Node> visitedOrder,
@@ -106,42 +125,36 @@ public class Graph {
                            List<VisitedEdge> visitedEdges) {
 
         visited.add(current);
-
-        // 🔵 exploración DFS real
         visitedOrder.add(current);
-
-        // 🔴 camino actual
         path.add(current);
 
-        if (current.equals(target)) {
-            return true;
-        }
+        if (current.equals(target)) return true;
 
         for (Node neighbor : adjList.getOrDefault(current, List.of())) {
 
-            // registrar TODA arista explorada (ida y retroceso)
-            visitedEdges.add(new VisitedEdge(current, neighbor));
-
             if (!visited.contains(neighbor)) {
-                if (dfsRec(
-                        neighbor,
-                        target,
-                        visited,
-                        path,
-                        visitedOrder,
-                        visitedEdges)) {
+
+                boolean bidirectional =
+                        adjList.containsKey(neighbor) &&
+                        adjList.get(neighbor).contains(current);
+
+                visitedEdges.add(
+                        new VisitedEdge(current, neighbor, bidirectional)
+                );
+
+                if (dfsRec(neighbor, target,
+                        visited, path, visitedOrder, visitedEdges)) {
                     return true;
                 }
             }
         }
 
-        // ⬅️ BACKTRACKING
         path.remove(path.size() - 1);
         return false;
     }
 
     // =========================
-    // Reconstruir camino (solo BFS)
+    // Reconstruir camino (BFS)
     // =========================
     private List<Node> reconstructPath(Map<Node, Node> parents, Node target) {
         LinkedList<Node> path = new LinkedList<>();
@@ -155,7 +168,7 @@ public class Graph {
     }
 
     // =========================
-    // Eliminar nodo (y conexiones)
+    // Eliminar nodo
     // =========================
     public void removeNode(Node node) {
         if (node == null || !adjList.containsKey(node)) return;
@@ -168,15 +181,24 @@ public class Graph {
     }
 
     // =========================
-    // Eliminar arista
+    // Eliminar arista (por defecto NO DIRIGIDA)
     // =========================
     public void removeEdge(Node a, Node b) {
+        removeEdge(a, b, true);
+    }
+
+    // =========================
+    // Eliminar arista (DIRIGIDA / NO DIRIGIDA)
+    // =========================
+    public void removeEdge(Node a, Node b, boolean noDirigido) {
         if (a == null || b == null) return;
 
         List<Node> la = adjList.get(a);
-        List<Node> lb = adjList.get(b);
-
         if (la != null) la.remove(b);
-        if (lb != null) lb.remove(a);
+
+        if (noDirigido) {
+            List<Node> lb = adjList.get(b);
+            if (lb != null) lb.remove(a);
+        }
     }
 }

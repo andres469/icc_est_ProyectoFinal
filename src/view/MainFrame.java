@@ -28,6 +28,7 @@ public class MainFrame extends JFrame {
     // ===== UI =====
     private JComboBox<String> comboAlgorithm;
     private JCheckBox checkExplorationMode;
+    private JCheckBox checkUndirected; // ✅ NUEVO
     private JTextField txtInicio;
     private JTextField txtDestino;
     private JLabel lblStatus;
@@ -36,13 +37,16 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
 
-        graph = new Graph();
-        controller = new GraphController(graph);
+        
+    graph = new Graph();
+    controller = new GraphController(graph);
 
-        setTitle("Ruta Óptima en Laberinto - UPS");
-        setSize(1200, 900);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+    setTitle("Ruta Óptima en Laberinto - UPS");
+    setSize(1500, 1100);
+    setLocationRelativeTo(null); // 👈 centra la ventana
+    setResizable(false);         // 👈 DESACTIVA maximizar
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setLayout(new BorderLayout());
 
         // ================= PANEL SUPERIOR =================
         JPanel controlPanel = new JPanel();
@@ -51,6 +55,10 @@ public class MainFrame extends JFrame {
 
         comboAlgorithm = new JComboBox<>(new String[]{"BFS", "DFS"});
         checkExplorationMode = new JCheckBox("Modo Exploración");
+
+        // ✅ checkbox de dirección
+        checkUndirected = new JCheckBox("Grafo NO dirigido (doble vía)");
+        checkUndirected.setSelected(true);
 
         txtInicio = new JTextField("N1", 4);
         txtDestino = new JTextField("N2", 4);
@@ -73,6 +81,7 @@ public class MainFrame extends JFrame {
         controlPanel.add(new JLabel(" | Algoritmo:"));
         controlPanel.add(comboAlgorithm);
         controlPanel.add(checkExplorationMode);
+        controlPanel.add(checkUndirected);
         controlPanel.add(btnRun);
         controlPanel.add(btnClear);
         controlPanel.add(btnMetrics);
@@ -98,10 +107,7 @@ public class MainFrame extends JFrame {
 
         btnRun.addActionListener(e -> ejecutarBusqueda());
 
-        // ---- TOGGLE ELIMINAR NODO ----
         btnDeleteNode.addActionListener(e -> setMode(InteractionMode.DELETE_NODE));
-
-        // ---- TOGGLE ELIMINAR CONEXIÓN ----
         btnDeleteEdge.addActionListener(e -> setMode(InteractionMode.DELETE_EDGE));
 
         btnClear.addActionListener(e -> {
@@ -130,7 +136,7 @@ public class MainFrame extends JFrame {
         });
     }
 
-    // ================= CONTROL DE MODOS (TOGGLE) =================
+    // ================= CONTROL DE MODOS =================
     private void setMode(InteractionMode mode) {
 
         if (currentMode == mode) {
@@ -140,14 +146,12 @@ public class MainFrame extends JFrame {
             currentMode = mode;
 
             switch (mode) {
-                case DELETE_NODE:
-                    lblStatus.setText("Modo: Eliminar nodo (clic sobre nodo)");
-                    break;
-                case DELETE_EDGE:
-                    lblStatus.setText("Modo: Eliminar conexión (clic nodo A → nodo B)");
-                    break;
-                default:
-                    lblStatus.setText("Modo: Normal");
+                case DELETE_NODE ->
+                        lblStatus.setText("Modo: Eliminar nodo (clic sobre nodo)");
+                case DELETE_EDGE ->
+                        lblStatus.setText("Modo: Eliminar conexión (clic nodo A → nodo B)");
+                default ->
+                        lblStatus.setText("Modo: Normal");
             }
         }
 
@@ -156,33 +160,62 @@ public class MainFrame extends JFrame {
 
     private void ejecutarBusqueda() {
 
-        Node start = null, target = null;
+    Node start = null, target = null;
 
-        for (Node n : graph.getAdjList().keySet()) {
-            if (n.getId().equalsIgnoreCase(txtInicio.getText().trim())) start = n;
-            if (n.getId().equalsIgnoreCase(txtDestino.getText().trim())) target = n;
+    for (Node n : graph.getAdjList().keySet()) {
+        if (n.getId().equalsIgnoreCase(txtInicio.getText().trim())) {
+            start = n;
         }
-
-        if (start == null || target == null) {
-            JOptionPane.showMessageDialog(this, "Nodos no encontrados.");
-            return;
+        if (n.getId().equalsIgnoreCase(txtDestino.getText().trim())) {
+            target = n;
         }
-
-        SearchResult result = controller.buscarRuta(
-                (String) comboAlgorithm.getSelectedItem(),
-                start,
-                target
-        );
-
-        mapPanel.setPath(
-                result.getPath(),
-                result.getVisitedNodes(),
-                result.getVisitedEdges(),
-                checkExplorationMode.isSelected()
-        );
-
-        lblStatus.setText(result.getPath() == null ? "Sin ruta" : "Ruta encontrada");
     }
+
+    if (start == null || target == null) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Uno o ambos nodos no existen.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
+
+    SearchResult result = controller.buscarRuta(
+            (String) comboAlgorithm.getSelectedItem(),
+            start,
+            target
+    );
+
+    // 🔴 SI NO EXISTE RUTA
+    if (result.getPath() == null || result.getPath().isEmpty()) {
+
+        mapPanel.setPath(null, null, null, false);
+
+        JOptionPane.showMessageDialog(
+                this,
+                "No existe una ruta desde " + start.getId() +
+                        " hasta " + target.getId() +
+                        ".\nVerifique la dirección de las conexiones.",
+                "Ruta no encontrada",
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        lblStatus.setText("Sin ruta");
+        return;
+    }
+
+    // ✅ SI EXISTE RUTA
+    mapPanel.setPath(
+            result.getPath(),
+            result.getVisitedNodes(),
+            result.getVisitedEdges(),
+            checkExplorationMode.isSelected()
+    );
+
+    lblStatus.setText("Ruta encontrada");
+}
+
 
     // ================= MAPA =================
     public void crearNodo(int x, int y) {
@@ -198,10 +231,17 @@ public class MainFrame extends JFrame {
     public void conectarNodos(Node a, Node b) {
         if (currentMode != InteractionMode.NORMAL) return;
 
-        graph.addEdge(a, b);
+        boolean noDirigido = checkUndirected.isSelected();
+        graph.addEdge(a, b, noDirigido);
+
         PersistenceManager.saveConfig(graph.getAdjList());
         mapPanel.setGraphData(graph.getAdjList());
-        lblStatus.setText("Conexión creada: " + a.getId() + " - " + b.getId());
+
+        lblStatus.setText(
+                noDirigido
+                        ? "Conexión creada (doble vía): " + a.getId() + " ↔ " + b.getId()
+                        : "Conexión creada (una vía): " + a.getId() + " → " + b.getId()
+        );
     }
 
     public void eliminarNodo(Node n) {
@@ -212,10 +252,13 @@ public class MainFrame extends JFrame {
     }
 
     public void eliminarConexion(Node a, Node b) {
-        graph.removeEdge(a, b);
+        boolean noDirigido = checkUndirected.isSelected();
+        graph.removeEdge(a, b, noDirigido);
+
         PersistenceManager.saveConfig(graph.getAdjList());
         mapPanel.setGraphData(graph.getAdjList());
-        lblStatus.setText("Conexión eliminada: " + a.getId() + " - " + b.getId());
+
+        lblStatus.setText("Conexión eliminada");
     }
 
     public InteractionMode getCurrentMode() {
