@@ -3,7 +3,6 @@ package view;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ public class MapPanel extends JPanel {
 
     private List<Node> currentPath;
     private List<Node> animatedExploration;
-    private List<Node> explorationOrder;
     private List<VisitedEdge> visitedEdges;
 
     private Timer explorationTimer;
@@ -44,7 +42,6 @@ public class MapPanel extends JPanel {
                 Node clicked = findNodeNear(e.getX(), e.getY());
                 MainFrame.InteractionMode mode = frame.getCurrentMode();
 
-                // ===== ELIMINAR NODO =====
                 if (mode == MainFrame.InteractionMode.DELETE_NODE) {
                     if (clicked != null) {
                         frame.eliminarNodo(clicked);
@@ -53,7 +50,6 @@ public class MapPanel extends JPanel {
                     return;
                 }
 
-                // ===== ELIMINAR CONEXIÓN =====
                 if (mode == MainFrame.InteractionMode.DELETE_EDGE) {
                     if (clicked == null) return;
 
@@ -70,13 +66,11 @@ public class MapPanel extends JPanel {
                     return;
                 }
 
-                // ===== MODO NORMAL =====
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     if (clicked == null) {
                         frame.crearNodo(e.getX(), e.getY());
                     }
-                }
-                else if (SwingUtilities.isRightMouseButton(e)) {
+                } else if (SwingUtilities.isRightMouseButton(e)) {
                     if (clicked != null) {
                         if (selectedNode == null) {
                             selectedNode = clicked;
@@ -93,7 +87,6 @@ public class MapPanel extends JPanel {
         });
     }
 
-    // ================= BUSCAR NODO =================
     private Node findNodeNear(int x, int y) {
         if (graphData == null) return null;
 
@@ -110,7 +103,6 @@ public class MapPanel extends JPanel {
         repaint();
     }
 
-    // ================= BFS / DFS =================
     public void setPath(List<Node> path,
                         List<Node> exploration,
                         List<VisitedEdge> edges,
@@ -120,27 +112,18 @@ public class MapPanel extends JPanel {
         this.visitedEdges = edges;
         this.isExplorationMode = explorationMode;
         this.explorationFinished = false;
+        this.explorationIndex = 0;
 
         if (explorationTimer != null && explorationTimer.isRunning()) {
             explorationTimer.stop();
         }
 
-        this.explorationOrder = new ArrayList<>();
-        this.animatedExploration = exploration;
-        this.explorationIndex = 0;
-
-        if (explorationMode && exploration != null) {
+        if (explorationMode && edges != null) {
 
             explorationTimer = new Timer(300, e -> {
-
-                if (explorationIndex < animatedExploration.size()) {
-
-                    // Agregamos nodo explorado
-                    explorationOrder.add(animatedExploration.get(explorationIndex));
+                if (explorationIndex < edges.size()) {
                     explorationIndex++;
-
                     repaint();
-
                 } else {
                     explorationFinished = true;
                     explorationTimer.stop();
@@ -156,7 +139,6 @@ public class MapPanel extends JPanel {
         }
     }
 
-    // ================= DIBUJO =================
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -179,31 +161,24 @@ public class MapPanel extends JPanel {
                 0
         );
 
-        // ================= ARISTAS NORMALES =================
+        // ================= ARISTAS BASE =================
         Set<String> drawnEdges = new HashSet<>();
 
         for (Node a : graphData.keySet()) {
             for (Node b : graphData.get(a)) {
 
-                String edgeId = a.getId() + "-" + b.getId();
-                String reverseId = b.getId() + "-" + a.getId();
+                String id = a.getId() + "-" + b.getId();
+                String reverse = b.getId() + "-" + a.getId();
 
                 boolean bidirectional =
                         graphData.containsKey(b) &&
                         graphData.get(b).contains(a);
 
-                if (bidirectional && drawnEdges.contains(reverseId)) {
-                    continue;
-                }
+                if (bidirectional && drawnEdges.contains(reverse)) continue;
 
-                drawnEdges.add(edgeId);
+                drawnEdges.add(id);
 
-                if (bidirectional) {
-                    g2.setStroke(normal);
-                } else {
-                    g2.setStroke(dashed);
-                }
-
+                g2.setStroke(bidirectional ? normal : dashed);
                 g2.setColor(Color.BLACK);
                 g2.drawLine(a.getX(), a.getY(), b.getX(), b.getY());
 
@@ -213,49 +188,77 @@ public class MapPanel extends JPanel {
             }
         }
 
-        // ================= EXPLORACIÓN (VERDE) =================
+        // ================= EXPLORACIÓN VERDE =================
         if (isExplorationMode && visitedEdges != null) {
-
-            g2.setColor(Color.GREEN);
-            g2.setStroke(new BasicStroke(3));
 
             int limit = Math.min(explorationIndex, visitedEdges.size());
 
             for (int i = 0; i < limit; i++) {
+
                 VisitedEdge edge = visitedEdges.get(i);
                 Node a = edge.getFrom();
                 Node b = edge.getTo();
 
+                boolean bidirectional =
+                        graphData.containsKey(b) &&
+                        graphData.get(b).contains(a);
+
+                g2.setStroke(bidirectional ? new BasicStroke(3) : dashed);
+                g2.setColor(Color.GREEN);
                 g2.drawLine(a.getX(), a.getY(), b.getX(), b.getY());
+
+                if (!bidirectional) {
+                    drawArrow(g2, a.getX(), a.getY(), b.getX(), b.getY());
+                }
             }
         }
 
-        // ================= RUTA FINAL (ROJO) =================
+        // ================= RUTA FINAL ROJA =================
         if (currentPath != null && (!isExplorationMode || explorationFinished)) {
 
-            g2.setColor(Color.RED);
-            g2.setStroke(new BasicStroke(5));
-
             for (int i = 0; i < currentPath.size() - 1; i++) {
+
                 Node a = currentPath.get(i);
                 Node b = currentPath.get(i + 1);
 
+                boolean bidirectional =
+                        graphData.containsKey(b) &&
+                        graphData.get(b).contains(a);
+
+                if (bidirectional) {
+                    g2.setStroke(new BasicStroke(5));
+                } else {
+                    g2.setStroke(new BasicStroke(
+                            5,
+                            BasicStroke.CAP_BUTT,
+                            BasicStroke.JOIN_BEVEL,
+                            0,
+                            new float[]{12},
+                            0
+                    ));
+                }
+
+                g2.setColor(Color.RED);
                 g2.drawLine(a.getX(), a.getY(), b.getX(), b.getY());
+
+                if (!bidirectional) {
+                    drawArrow(g2, a.getX(), a.getY(), b.getX(), b.getY());
+                }
             }
         }
 
         // ================= NODOS =================
         for (Node n : graphData.keySet()) {
 
-            boolean seleccionado = (n == selectedNode);
+            boolean selected = (n == selectedNode);
 
-            g2.setColor(seleccionado ? Color.GREEN : Color.BLUE);
+            g2.setColor(selected ? Color.GREEN : Color.BLUE);
             g2.fillOval(n.getX() - 15, n.getY() - 15, 30, 30);
 
             g2.setColor(Color.WHITE);
             g2.drawString(n.getId(), n.getX() - 10, n.getY() + 5);
 
-            if (seleccionado) {
+            if (selected) {
                 g2.setColor(Color.GREEN);
                 g2.setStroke(new BasicStroke(2));
                 g2.drawOval(n.getX() - 18, n.getY() - 18, 36, 36);
@@ -263,7 +266,6 @@ public class MapPanel extends JPanel {
         }
     }
 
-    // ================= FLECHA =================
     private void drawArrow(Graphics2D g2, int x1, int y1, int x2, int y2) {
 
         double phi = Math.toRadians(25);
@@ -281,7 +283,6 @@ public class MapPanel extends JPanel {
         }
     }
 
-    // ================= RESET =================
     public void resetSelection() {
         selectedNode = null;
         tempEdgeNode = null;

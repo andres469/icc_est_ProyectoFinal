@@ -201,4 +201,13 @@ public class Graph {
             if (lb != null) lb.remove(a);
         }
     }
+    public boolean isBidirectional(Node a, Node b) {
+    List<Node> vecinosA = adjList.get(a);
+    List<Node> vecinosB = adjList.get(b);
+
+    if (vecinosA == null || vecinosB == null) return false;
+
+    return vecinosA.contains(b) && vecinosB.contains(a);
+}
+
 }
