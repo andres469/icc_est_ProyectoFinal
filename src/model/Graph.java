@@ -6,26 +6,20 @@ public class Graph {
 
     private Map<Node, List<Node>> adjList = new HashMap<>();
 
-    // =========================
     // Agregar nodo
-    // =========================
     public void addNode(Node node) {
         if (node == null) return;
         adjList.putIfAbsent(node, new ArrayList<>());
     }
 
-    // =========================
     // Agregar arista (por defecto NO DIRIGIDA)
-    // =========================
     public void addEdge(Node a, Node b) {
         addEdge(a, b, true);
     }
 
-    // =========================
     // Agregar arista (DIRIGIDA / NO DIRIGIDA)
     // true  = no dirigida (doble vía)
     // false = dirigida
-    // =========================
     public void addEdge(Node a, Node b, boolean noDirigido) {
         if (a == null || b == null || a.equals(b)) return;
 
@@ -47,9 +41,7 @@ public class Graph {
         return adjList;
     }
 
-    // =========================
     // BFS
-    // =========================
     public List<Node> bfs(Node start, Node target,
                           List<Node> visitedOrder,
                           List<VisitedEdge> visitedEdges) {
@@ -93,9 +85,7 @@ public class Graph {
         return null;
     }
 
-    // =========================
     // DFS
-    // =========================
     public List<Node> dfs(Node start, Node target,
                           List<Node> visitedOrder,
                           List<VisitedEdge> visitedEdges) {
@@ -153,9 +143,7 @@ public class Graph {
         return false;
     }
 
-    // =========================
     // Reconstruir camino (BFS)
-    // =========================
     private List<Node> reconstructPath(Map<Node, Node> parents, Node target) {
         LinkedList<Node> path = new LinkedList<>();
         Node curr = target;
@@ -167,9 +155,7 @@ public class Graph {
         return path;
     }
 
-    // =========================
     // Eliminar nodo
-    // =========================
     public void removeNode(Node node) {
         if (node == null || !adjList.containsKey(node)) return;
 
@@ -180,16 +166,12 @@ public class Graph {
         adjList.remove(node);
     }
 
-    // =========================
     // Eliminar arista (por defecto NO DIRIGIDA)
-    // =========================
     public void removeEdge(Node a, Node b) {
         removeEdge(a, b, true);
     }
 
-    // =========================
     // Eliminar arista (DIRIGIDA / NO DIRIGIDA)
-    // =========================
     public void removeEdge(Node a, Node b, boolean noDirigido) {
         if (a == null || b == null) return;
 
