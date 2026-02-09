@@ -1,4 +1,4 @@
-# 📘 Proyecto Final – Estructura de Datos  
+#  Proyecto Final – Estructura de Datos  
 ## Sistema Interactivo de Exploración de Grafos con BFS y DFS  
 
 ### Universidad Politécnica Salesiana  
@@ -12,7 +12,7 @@
 
 **Periodo:** Segundo 
 
-**Correo_institucional:** jtenesacac4@est.ups.edu.ec, ecollaguazom@est.ups.edu.ec 
+**Correo institucional:** jtenesacac4@est.ups.edu.ec, ecollaguazom@est.ups.edu.ec 
 
 ---
 
@@ -44,7 +44,7 @@ El sistema no solo muestra la ruta final encontrada, sino también el proceso co
 
 #  3. Marco Teórico
 
-## 🔹 3.1 Grafos
+##  3.1 Grafos
 
 Un **grafo** es una estructura de datos compuesta por:
 
@@ -61,7 +61,7 @@ Donde:
 
 ---
 
-## 🔹 3.2 BFS (Breadth First Search)
+##  3.2 BFS (Breadth First Search)
 
 El algoritmo BFS:
 
@@ -78,7 +78,7 @@ Características:
 
 ---
 
-## 🔹 3.3 DFS (Depth First Search)
+##  3.3 DFS (Depth First Search)
 
 El algoritmo DFS:
 
@@ -425,6 +425,8 @@ App.java
 ---
 
 #  19. Conclusiones
+### Conclusión personal – Andrés Tenesaca
+El desarrollo de la presente práctica y del proyecto final permitió fortalecer de manera significativa mis conocimientos en estructuras de datos, especialmente en el manejo de grafos y algoritmos de búsqueda como BFS y DFS. A través de la implementación práctica en Java, comprendí el funcionamiento interno de estructuras como HashMap, Queue, Set, listas dinámicas y su integración dentro de un sistema organizado bajo el patrón MVC.
 
 El desarrollo de este proyecto permitió aplicar de manera práctica los conceptos fundamentales de estructuras de datos, específicamente grafos y algoritmos de recorrido.
 

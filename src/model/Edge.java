@@ -8,7 +8,6 @@
             this.source = source;
             this.dest = dest;
         }
-        // Getters
         public Node getSource() { return source; }
         public Node getDest() { return dest; }
     }

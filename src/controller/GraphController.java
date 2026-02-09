@@ -13,7 +13,6 @@ public class GraphController {
         this.graph = graph;
     }
 
-    // 🔥 BFS / DFS con métricas completas
     public SearchResult buscarRuta(String metodo, Node inicio, Node fin) {
 
         List<Node> visitedNodes = new ArrayList<>();
@@ -30,7 +29,6 @@ public class GraphController {
 
         long endTime = System.nanoTime();
 
-        // 🔥 MÉTRICA COMPLETA
         MetricsLogger.log(
             metodo,
             inicio.getId(),

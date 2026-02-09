@@ -6,7 +6,7 @@ public class Graph {
 
     private Map<Node, List<Node>> adjList = new HashMap<>();
 
-    // Agregar nodo
+ 
     public void addNode(Node node) {
         if (node == null) return;
         adjList.putIfAbsent(node, new ArrayList<>());
@@ -155,7 +155,7 @@ public class Graph {
         return path;
     }
 
-    // Eliminar nodo
+    // Eliminar 
     public void removeNode(Node node) {
         if (node == null || !adjList.containsKey(node)) return;
 
