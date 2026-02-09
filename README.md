@@ -403,12 +403,11 @@ Esto permite realizar comparaciones objetivas entre ambos algoritmos y analizar 
 El sistema puede ampliarse con:
 
 - Implementación de grafos ponderados  
-- Algoritmo de Dijkstra  
-- Algoritmo A* (A Star)  
 - Interfaz mejorada con animaciones avanzadas  
 - Exportación de resultados en PDF  
 - Uso de base de datos en lugar de archivos planos  
-- Simulación comparativa automática entre algoritmos  
+- Simulación comparativa automática entre algoritmos 
+- elimininacion de recorrido visitado y camino final 
 
 ---
 
