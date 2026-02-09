@@ -14,6 +14,16 @@
 
 **Correo institucional:** jtenesacac4@est.ups.edu.ec, ecollaguazom@est.ups.edu.ec 
 
+**Links de video Explicativo:** 
+
+Video principal 
+
+ - https://youtu.be/n-TMLUHwPGI
+
+Video alternativo con Bloopers al final
+
+- https://youtu.be/V60yoN8Vl_Y
+
 ---
 
 #  1. Introducción
@@ -441,6 +451,14 @@ Se logró:
 BFS demostró ser más adecuado cuando se requiere el camino más corto, mientras que DFS resulta útil para exploraciones profundas y análisis estructurales del grafo.
 
 El proyecto consolida el aprendizaje teórico mediante una implementación funcional, modular y extensible.
+
+### Conclusión personal – Erika Collaguazo 
+
+A través de este proyecto logré comprender cómo un grafo puede representar situaciones reales y cómo los algoritmos BFS y DFS toman decisiones distintas al recorrerlo. Más allá del resultado final, entendí el proceso interno de exploración y cómo cada estructura de datos cumple un papel específico dentro del sistema.
+
+Trabajar con la interfaz gráfica y ver el recorrido en tiempo real me ayudó a relacionar la lógica del código con su comportamiento visual. También fortalecí mi comprensión sobre la organización del proyecto usando MVC y la importancia de mantener el código ordenado y modular.
+
+Este trabajo me permitió conectar la teoría con la práctica y ganar mayor seguridad al implementar estructuras de datos en una aplicación completa.
 
 ---
 
